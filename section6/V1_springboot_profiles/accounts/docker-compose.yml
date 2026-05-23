@@ -1,0 +1,47 @@
+services:
+  accounts:
+    image: "udaychowdary/accounts:s4"
+    container_name: accounts-ms
+    ports:
+      - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - udaybank
+
+  loans:
+    image: "udaychowdary/loans:s4"
+    container_name: loans-ms
+    ports:
+      - "8090:8090"
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - udaybank
+
+  cards:
+    image: "udaychowdary/cards:s4"
+    container_name: cards-ms
+    ports:
+      - "9000:9000"
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - udaybank
+
+networks:
+  udaybank:
+    driver: bridge
+
+#this file we can write any service to create the container at a time of all images like the loans, card and acconunts
+
+#network is create bridge with name udaybank bettwen the all service to inter communicate each other
+
+
+#to run this compose file . root to accounts . docker compose up
