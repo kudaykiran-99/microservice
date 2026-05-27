@@ -1,14 +1,24 @@
-# Maven
+# Maven build
 target/
 
-# Java
-*.class
-*.log
+# Jib cache
+**/jib-cache/
 
-# IDE
+# IntelliJ
 .idea/
+*.iml
+
+# VS Code
 .vscode/
 
+# Logs
+*.log
+
+# Environment
+.env
 
 # Node
 node_modules/
+
+# Docker exports
+*.tar
