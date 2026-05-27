@@ -1,0 +1,160 @@
+services:
+  #we are using the rabbitmq spring cloud buss without calling the refresh api manually after updateing the properties    .
+  accountsdb:
+    image: mysql
+    container_name: accountsdb
+    ports:
+      - 3307:3306
+    healthcheck:
+      test: ["CMD","mysqladmin","ping","-h","localhost"]
+      timeout: 10s
+      retries: 10
+      interval: 10s
+      start_period: 10s
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: accountsdb
+    networks:
+      - udaybank
+
+  loansdb:
+    image: mysql
+    container_name: loanssdb
+    ports:
+      - 3308:3306
+    healthcheck:
+      test: [ "CMD","mysqladmin","ping","-h","localhost" ]
+      timeout: 10s
+      retries: 10
+      interval: 10s
+      start_period: 10s
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: loansdb
+    networks:
+      - udaybank
+
+  cardsdb:
+    image: mysql
+    container_name: cardsdb
+    ports:
+      - 3309:3306
+    healthcheck:
+      test: [ "CMD","mysqladmin","ping","-h","localhost" ]
+      timeout: 10s
+      retries: 10
+      interval: 10s
+      start_period: 10s
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cardsdb
+    networks:
+      - udaybank
+
+  springconfigserver:
+    image: "udaychowdary/springconfigserver:s7"
+    container_name: springconfigserver-ms
+    ports:
+      - "8071:8071"
+    healthcheck:
+      test: "curl --fail --silent localhost:8071/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+#to test liveness and readness is true config service is up or not if not restart config service again because other service are dependent on the config service to access the properties . services linke the accounts, cards, loans
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - udaybank
+
+  accounts:
+    image: "udaychowdary/accounts:s7"
+    container_name: accounts-ms
+    ports:
+      - "8080:8080"
+    depends_on:
+      springconfigserver:
+        condition: service_healthy
+      accountsdb:
+        condition: service_healthy
+      #its like adding condtiton to accounts to start after the spring config service is up and running. because acc was depended on the config to access the properties
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - udaybank
+    environment:
+      SPRING_APPLICATION_NAME: "accounts"
+      SPRING_CONFIG_IMPORT: "configserver:http:springconfigserver:8071/"
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_DATASOURCE_URL: "jdbc:mysql://accountsdb:3306/accountsdb"
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+
+
+      #this will connect to accountsdb container in of the file declared.
+#    environment: is accouts cervice is connect to the config server.
+  loans:
+    image: "udaychowdary/loans:s7"
+    container_name: loans-ms
+    ports:
+      - "8090:8090"
+    depends_on:
+      springconfigserver:
+        condition: service_healthy
+      loansdb:
+        condition: service_healthy
+      #its like adding condtiton to accounts to start after the spring config service is up and running. because acc was depended on the config to access the properties
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - udaybank
+    environment:
+      SPRING_APPLICATION_NAME: "loans"
+      SPRING_CONFIG_IMPORT: "configserver:http:springconfigserver:8071/"
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_DATASOURCE_URL: "jdbc:mysql://loansdb:3306/loansdb"
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+  cards:
+    image: "udaychowdary/cards:s7"
+    container_name: cards-ms
+    ports:
+      - "9000:9000"
+    depends_on:
+      springconfigserver:
+        condition: service_healthy
+      cardsdb:
+        condition: service_healthy
+      #its like adding condtiton to accounts to start after the spring config service is up and running. because acc was depended on the config to access the properties
+
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - udaybank
+    environment:
+      SPRING_APPLICATION_NAME: "cards"
+      SPRING_CONFIG_IMPORT: "configserver:http:springconfigserver:8071/"
+      SPRING_PROFILES_ACTIVE: default
+      SPRING_DATABASESOURCE_URL: "jdbc:mysql://cardsdb:3306/cardsdb"
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
+
+networks:
+  udaybank:
+    driver: bridge
+
+#this file we can write any service to create the container at a time of all images like the loans, card and acconunts
+
+#network is create bridge with name udaybank bettwen the all service to inter communicate each other
+
+
+#to run this compose file . root to accounts . docker compose up

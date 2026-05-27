@@ -1,0 +1,32 @@
+server:
+  port: 9000
+spring:
+  application:
+    name: "cards"
+  profiles:
+    active: "prod"
+  datasource:
+    url: jdbc:mysql://localhost:3308/cardsdb
+    username: root
+    password: root
+  jpa:
+    show-sql: true
+  sql:
+    init:
+      mode: always
+        #while stratign the application it all was check the schema.sql fiel excute the all tbales if table present in the database then not excute . which ever not there it automatically excute the tbales
+
+  config:
+    import: "optional:configserver:http:localhost:8071/"
+
+
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        insclude: "*"
+
+
+      #enableing the spring activetors to use all apis in the application
