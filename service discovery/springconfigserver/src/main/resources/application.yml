@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: "springconfigserver"
+  profiles:
+    #active: native  #if we wan to fetcht properties files from the local file sys or the class path under config floder then we need use the native
+    active: git
+  cloud:
+    config:
+      server:
+        #native:
+         #search-location: "classpath:/config"
+        #search-location: "file:///c:/uday/doucment.config"
+        #all service yml fiels store in the local system on above mentioned path
+        git:
+          uri: "https://github.com/kudaykiran-99/uday-config.git"
+          default-label: main
+          timeout: 5
+          clone-on-start: true
+          force-pull: true
+
+server:
+  port: 8071
+
+encrypt:
+  key: "4566JKHGHH344BNHVK32WERD123IOUHNB45"
+
+  #this was the enecrpt key. by using the configservcer location endpoint encrpt pass the plain test it will give the output as encrpted value. this value you paste in the git, while fecthing the enecrpted value from git properties then spring automatically decrpt the value and show.
+
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        insclude: "*"
+  health:
+    readiness-state:
+      enabled:true
+    liveness-state:
+      enabled:true
+  endpoint:
+    health:
+      probes:
+        enabled:true
+

@@ -1,0 +1,128 @@
+services:
+  #we are using the rabbitmq spring cloud buss without calling the refresh api manually after updateing the properties    .
+  springconfigserver:
+    image: "udaychowdary/springconfigserver:s8"
+    container_name: accounts-ms
+    ports:
+      - "8071:8071"
+    healthcheck:
+      test: "curl --fail --slient localhost:8071/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    #to test liveness and readness is true config service is up or not if not restart config service again because other service are dependent on the config service to access the properties . services linke the accounts, cards, loans
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - udaybank
+
+  eurekaserver:
+    image: "udaychowdary/eurekaserver:s8"
+    container_name: eurekaserver-ms
+    ports:
+      - "8070:8071"
+    healthcheck:
+      test: "curl --fail --slient localhost:8070/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    #to test liveness and readness is true config service is up or not if not restart config service again because other service are dependent on the config service to access the properties . services linke the accounts, cards, loans
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    depends_on:
+      springconfigserver:
+        condition: service_healthy
+    environment:
+      SPRING_APPLICATION_NAME: "eurekaserver"
+    networks:
+      - udaybank
+  accounts:
+    image: "udaychowdary/accounts:s8"
+    container_name: accounts-ms
+    ports:
+      - "8080:8080"
+    depends_on:
+      springconfigserver:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+      #accounts depend on eureka server
+      #its like adding condtiton to accounts to start after the spring config service is up and running. because acc was depended on the config to access the properties
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - udaybank
+    environment:
+      SPRING_APPLICATION_NAME: "accounts"
+      SPRING_CONFIG_IMPORT: "configserver:http:springconfigserver:8071/"
+      SPRING_PROFILES_ACTIVE: prod
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
+      #to connect to eureka server
+  #    environment: is accouts cervice is connect to the config server.
+  loans:
+    image: "udaychowdary/loans:s8"
+    container_name: loans-ms
+    ports:
+      - "8090:8090"
+    depends_on:
+      springconfigserver:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+      #its like adding condtiton to accounts to start after the spring config service is up and running. because acc was depended on the config to access the properties
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - udaybank
+    environment:
+      SPRING_APPLICATION_NAME: "loans"
+      SPRING_CONFIG_IMPORT: "configserver:http:springconfigserver:8071/"
+      SPRING_PROFILES_ACTIVE: prod
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
+      #to connect to eureka server
+
+  cards:
+    image: "udaychowdary/cards:s8"
+    container_name: cards-ms
+    ports:
+      - "9000:9000"
+    depends_on:
+      springconfigserver:
+        condition: service_healthy
+      eurekaserver:
+        condition: service_healthy
+      #its like adding condtiton to accounts to start after the spring config service is up and running. because acc was depended on the config to access the properties
+
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - udaybank
+    environment:
+      SPRING_APPLICATION_NAME: "cards"
+      SPRING_CONFIG_IMPORT: "configserver:http:springconfigserver:8071/"
+      SPRING_PROFILES_ACTIVE: prod
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eurekaserver:8070/eureka/
+      #to connect to eureka server
+
+networks:
+  udaybank:
+    driver: bridge
+
+#this file we can write any service to create the container at a time of all images like the loans, card and acconunts
+
+#network is create bridge with name udaybank bettwen the all service to inter communicate each other
+
+
+#to run this compose file . root to accounts . docker compose up

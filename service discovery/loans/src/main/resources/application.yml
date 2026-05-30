@@ -1,0 +1,61 @@
+server:
+  port: 8090
+spring:
+  application:
+    name: "loans"
+  profiles:
+    active: "prod"
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password: ''
+  h2:
+    console:
+      enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    config:
+      import: "optional:configserver:http:localhost:8071/"
+
+
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        insclude: "*"
+  endpoint:
+    shutdown:
+      access: unrestricted
+    info:
+      env:
+        enabled: true
+
+
+      #enableing the spring activetors to use all apis in the application
+
+
+
+eureka:
+  instance:
+    preferIPAddress: true
+  client:
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://localhost:8070/eureka/
+
+      #when ever the accounts service is started then it will connec to eureka and regiserd
+      #info is like accounts details show on the eureka dashboard
+
+
+info:
+  app:
+    name: "loans"
+    description: "uday bank loans application"
+    version: "1.0.0"
