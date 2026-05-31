@@ -1,0 +1,14 @@
+
+
+#value declare in the application properties and fetch into class by using value.
+build:
+  version: "1.0"
+
+accounts:
+  message: "im uday"
+  contactDetails:
+    name:"uday"
+    email:"uday@gmail.com"
+  onCallSupport:
+    -12345
+    -1234545

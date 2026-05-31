@@ -1,0 +1,78 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: "accounts"
+  profiles:
+    active: "prod"
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password: ''
+  h2:
+    console:
+      enabled: true
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  config:
+    import: "optional:configserver:http:localhost:8071/"
+
+
+
+#from accouts yml file we activing profile the prod and calling the service config with url. regraless name of the config service we have use the same configserver in url
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        insclude: "*"
+  health:
+    readiness-state:
+      enabled:true
+    liveness-state:   #after starting acc and cards, loans service then only gate way should start to read all service address from the eureka
+      enabled:true
+  endpoint:
+    shutdown:
+      access: unrestricted
+    health:
+      probes:
+        enabled:true
+    info:
+      env:
+        enabled: true
+
+
+      #enableing the spring activetors to use all apis in the application
+
+
+
+eureka:
+  instance:
+    preferIPAddress: true
+  client:
+    fetchRegistry: true
+    registerWithEureka: true
+    serviceUrl:
+      defaultZone: http://localhost:8070/eureka/
+
+      #when ever the accounts service is started then it will connec to eureka and regiserd
+      #info is like accounts details show on the eureka dashboard
+
+
+info:
+  app:
+    name: "accounts"
+    description: "uday bank accounts application"
+    version: "1.0.0"
+
+
+logging:
+  level:
+    com:
+      uday:
+        aacounts: DEBUG

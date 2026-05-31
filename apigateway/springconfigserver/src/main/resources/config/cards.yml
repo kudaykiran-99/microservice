@@ -1,0 +1,22 @@
+
+
+#now we will deploy the appilcation and creating the image no need to create image for every env. just create yml fiels diffrent env and active in the default yml fiel is called profiels
+
+
+#value declare in the application properties and fetch into class by using value.
+build:
+  version: "3.0"
+
+#envirolment to fetch value from the local system. in accounts controller
+
+#we can fetch multiple propertirs at a time by using configuration properties by declareing in the yaml fiel . prifix should be same. will create the record class to mapp this fields to application to use any where into appl
+
+accounts:
+  message: "im uday"
+  contactDetails:
+    name:"uday"
+    email:"uday@gmail.com"
+  onCallSupport:
+    -12345
+    -1234545
+

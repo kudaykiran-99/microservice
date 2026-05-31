@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: "gatewayserver"
+  config:
+    import: "optional:configserver:http://localhost:8071/"
+#some propreties will fetch from config server
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: false   #if we are not using any custom path then we go with default api gate way path. now i alteady create custom api path udayback prefix befoure microservice name then no need to giev acces to default api path . false
+              lowerCaseServiceId: true
+              #by default the gateway will accept the eureka registed names as capital letters ACCOUNTS, LOANS now we can acces the by lower case letters.
+
+              #enanleing the api gateway server to access the micro service instanes in the eureka
+
+
+
+
+#from accouts yml file we activing profile the prod and calling the service config with url. regraless name of the config service we have use the same configserver in url
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+  endpoint:
+    gateway:
+      access: unrestricted
+
+  info:
+    env:
+      enabled: true
+
+
+      #enableing the spring activetors to use all apis in the application
+
+
+
+info:
+  app:
+    name: "gateway server"
+    description: "uday bank gateway application"
+    version: "1.0.0"
+
+logging:
+  level:
+    com:
+      uday:
+        gatewayserver: DEBUG

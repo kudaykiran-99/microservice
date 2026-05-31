@@ -1,0 +1,27 @@
+
+spring:
+  application:
+    name: "eurekaserver"
+    #is connect to config server
+  config:
+    import: "optional:configserver:http://localhost:8071"
+
+#to check livenees and readness of the eureka server. this server is dependednt to other services like the acc, cards, loans
+management:
+  endpoints:
+    web:
+      exposure:
+        insclude: "*"
+  health:
+    readiness-state:
+      enabled:true
+    liveness-state:
+      enabled:true
+  endpoint:
+    health:
+      probes:
+        enabled:true
+
+
+#other properties like the eureka port and local host address addded in the congig server git floder with name eureka server file
+#because eureka server dependent on the spring config server to fetch eureka preoperties.
